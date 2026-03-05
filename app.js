@@ -1,4 +1,3 @@
-
 const $ = (sel) => document.querySelector(sel);
 const el = (tag, attrs={}, ...children) => {
   const node = document.createElement(tag);
@@ -47,8 +46,17 @@ $('#btn-crear').addEventListener('click', ()=>{
   const n = Math.max(3, Math.min(30, parseInt($('#numPlayers').value||'10')));
   const mode = $('#mode').value;
   const namesTxt = ($('#names').value||'').trim();
-  const names = namesTxt ? namesTxt.split(/
-|,/).map(s=>s.trim()).filter(Boolean) : Array.from({length:n}, (_,i)=>`Jugador ${i+1}`);
+
+  // ✅ split SEGURO sin regex (evita el error de "missing /")
+  const names = namesTxt
+    ? namesTxt
+        .replace(/\r/g, '')                // limpia CR de Windows
+        .split('\n')                       // separa por líneas
+        .flatMap(line => line.split(','))  // también por comas
+        .map(s => s.trim())                // recorta espacios
+        .filter(Boolean)                   // saca vacíos
+    : Array.from({length:n}, (_,i)=>`Jugador ${i+1}`);
+
   const players = names.slice(0,n).map((name,i)=>({id:`p${i+1}`, name}));
   state = { roomName, mode, players, round:1, hostAssignments:null, votes:{}, scores:Object.fromEntries(players.map(p=>[p.id,0])) };
   save(); renderRoom();
@@ -96,8 +104,7 @@ function renderLinks(){
     c.appendChild(row);
   });
 }
-$('#btn-copiar-todos').addEventListener('click', async ()=>{ if(!state.hostAssignments) return alert('Primero asigná roles.'); const all=state.hostAssignments.links.map(l=>`${l.name}: ${l.url}`).join('
-'); const ok=await copyText(all); alert(ok?'Links copiados al portapapeles':all); });
+$('#btn-copiar-todos').addEventListener('click', async ()=>{ if(!state.hostAssignments) return alert('Primero asigná roles.'); const all=state.hostAssignments.links.map(l=>`${l.name}: ${l.url}`).join('\n'); const ok=await copyText(all); alert(ok?'Links copiados al portapapeles':all); });
 
 function renderVotesTable(){ const c=$('#tabla-votos'); if(!c) return; c.innerHTML=''; const options=state.players.map(p=>({value:p.id,label:p.name})); state.players.forEach(p=>{ const sel=el('select',{id:`vote-${p.id}`}, el('option',{value:''},'—')); options.forEach(o=> sel.appendChild(el('option',{value:o.value},o.label))); if(state.votes[p.id]) sel.value=state.votes[p.id]; sel.addEventListener('change',()=>{ state.votes[p.id]=sel.value; save(); }); c.appendChild(el('div',{class:'player'}, el('div',{},p.name), sel)); }); }
 $('#btn-limpiar-votos').addEventListener('click', ()=>{ state.votes={}; save(); renderVotesTable(); $('#resultado').textContent=''; });
