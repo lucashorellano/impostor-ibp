@@ -12,7 +12,17 @@ const randomPick = (arr) => arr[Math.floor(Math.random()*arr.length)];
 
 // Temas
 const TEMAS_TRIPULANTES = [
-  'Forecast de demanda','Backlog','Inventarios de seguridad','Capacity planning','IBP / S&OP','Lead times','Shut-downs de plantas','Rolling forecast','Capex','Productividad en líneas críticas','Plan de mitigación','Ventas perdidas (lost sales)','Fill rate','Obsolescencias','Network optimization','Cost to Serve','Master data','Escenarios What‑If','Bottlenecks','Forecast bias','End-to-end visibility','Plan de contingencia','Nivel de servicio al cliente','Costos logísticos','Inventarios estacionales','Integración Ventas–Operaciones','Materiales críticos','SKU rationalization','OTIF','Paradas imprevistas de planta','Control Tower','Planificación a largo plazo','Vendor performance','Time Fence','Balanceo capacidad vs demanda','Dashboard mensual','Cadena end‑to‑end','Prioridades del mes','Supply risk'
+  "Mate",
+  "Sushi",
+  "Harry Potter",
+  "Fast & Furious",
+  "Los Simpson",
+  "Johnny Depp",
+  "George Clooney",
+  "Extraterrestre",
+  "Paris",
+  "New York"
+
 ];
 const TEMAS_VAGOS_IMPOSTOR = [
   'Algo que se revisa siempre','Algo que cambia seguido','Algo relacionado a procesos','Algo importante… o tal vez no','Algo que depende de muchas áreas','Algo que se menciona en reuniones','Algo que genera debate','Algo que impacta resultados','Algo que aparece en reportes','Algo que influye en el tiempo'
