@@ -24,9 +24,7 @@ const TEMAS_TRIPULANTES = [
   "New York"
 
 ];
-const TEMAS_VAGOS_IMPOSTOR = [
-  'Algo que se revisa siempre','Algo que cambia seguido','Algo relacionado a procesos','Algo importante… o tal vez no','Algo que depende de muchas áreas','Algo que se menciona en reuniones','Algo que genera debate','Algo que impacta resultados','Algo que aparece en reportes','Algo que influye en el tiempo'
-];
+const TEMAS_VAGOS_IMPOSTOR = [];
 
 // Estado
 let state = { roomName:'', mode:'links', players:[], round:1, hostAssignments:null, votes:{}, scores:{} };
