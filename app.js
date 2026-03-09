@@ -11,19 +11,7 @@ const copyText = async (text) => { try { await navigator.clipboard.writeText(tex
 const randomPick = (arr) => arr[Math.floor(Math.random()*arr.length)];
 
 // Temas
-const TEMAS_TRIPULANTES = [
-  "Mate",
-  "Sushi",
-  "Harry Potter",
-  "Fast & Furious",
-  "Los Simpson",
-  "Johnny Depp",
-  "George Clooney",
-  "Extraterrestre",
-  "Paris",
-  "New York"
-
-];
+const TEMAS_TRIPULANTES = [  "Mate",  "Sushi",  "Harry Potter",  "Fast & Furious",  "Los Simpson",  "Johnny Depp",  "George Clooney",  "Extraterrestre",  "Paris",  "New York"];
 const TEMAS_VAGOS_IMPOSTOR = [];
 
 // Estado
