@@ -1,17 +1,30 @@
+
 const $ = (sel) => document.querySelector(sel);
 const el = (tag, attrs={}, ...children) => {
   const node = document.createElement(tag);
-  Object.entries(attrs).forEach(([k,v]) => {
-    if (k === 'class') node.className = v; else if (k === 'html') node.innerHTML = v; else node.setAttribute(k, v);
-  });
-  children.forEach(c => { if (typeof c === 'string') node.appendChild(document.createTextNode(c)); else if (c) node.appendChild(c); });
+  Object.entries(attrs).forEach(([k,v]) => { if (k==='class') node.className=v; else if (k==='html') node.innerHTML=v; else node.setAttribute(k,v); });
+  children.forEach(c=>{ if (typeof c==='string') node.appendChild(document.createTextNode(c)); else if (c) node.appendChild(c); });
   return node;
 };
 const copyText = async (text) => { try { await navigator.clipboard.writeText(text); return true; } catch(e){ return false; } }
 const randomPick = (arr) => arr[Math.floor(Math.random()*arr.length)];
+const shuffle = (arr) => { const a = arr.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
 
-// Temas
-const TEMAS_TRIPULANTES = [  "Mate",  "Sushi",  "Harry Potter",  "Fast & Furious",  "Los Simpson",  "Johnny Depp",  "George Clooney",  "Extraterrestre",  "Paris",  "New York"];
+// === Temas: SOLO estas 10 palabras ===
+const TEMAS_TRIPULANTES = [
+  'Mate',
+  'Sushi',
+  'Harry Potter',
+  'Fast & Furious',
+  'Los Simpson',
+  'Johnny Depp',
+  'George Clooney',
+  'Extraterrestre',
+  'Paris',
+  'New York'
+];
+
+// Sin temas vagos
 const TEMAS_VAGOS_IMPOSTOR = [];
 
 // Estado
@@ -19,7 +32,7 @@ let state = { roomName:'', mode:'links', players:[], round:1, hostAssignments:nu
 const save = () => localStorage.setItem('impostor-ibp-state', JSON.stringify(state));
 const load = () => { try { return JSON.parse(localStorage.getItem('impostor-ibp-state')); } catch(e){ return null } };
 
-// PWA Install
+// PWA install
 let deferredPrompt; window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault(); deferredPrompt=e; $('#btn-instalar')?.classList.remove('hidden');});
 $('#btn-instalar')?.addEventListener('click', async ()=>{ if(!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; $('#btn-instalar').classList.add('hidden'); });
 if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('service-worker.js').catch(()=>{}); }); }
@@ -42,17 +55,8 @@ $('#btn-crear').addEventListener('click', ()=>{
   const n = Math.max(3, Math.min(30, parseInt($('#numPlayers').value||'10')));
   const mode = $('#mode').value;
   const namesTxt = ($('#names').value||'').trim();
-
-  // ✅ split SEGURO sin regex (evita el error de "missing /")
-  const names = namesTxt
-    ? namesTxt
-        .replace(/\r/g, '')                // limpia CR de Windows
-        .split('\n')                       // separa por líneas
-        .flatMap(line => line.split(','))  // también por comas
-        .map(s => s.trim())                // recorta espacios
-        .filter(Boolean)                   // saca vacíos
-    : Array.from({length:n}, (_,i)=>`Jugador ${i+1}`);
-
+  const names = namesTxt ? namesTxt.replace(//g,'').split('
+').flatMap(line=>line.split(',')).map(s=>s.trim()).filter(Boolean) : Array.from({length:n}, (_,i)=>`Jugador ${i+1}`);
   const players = names.slice(0,n).map((name,i)=>({id:`p${i+1}`, name}));
   state = { roomName, mode, players, round:1, hostAssignments:null, votes:{}, scores:Object.fromEntries(players.map(p=>[p.id,0])) };
   save(); renderRoom();
@@ -72,10 +76,18 @@ function renderScores(){ const c=$('#tabla-puntajes'); c.innerHTML=''; Object.en
 
 function generateAssignments(){
   const topicGroup = randomPick(TEMAS_TRIPULANTES);
-  const impostor = randomPick(state.players);
-  const links = state.players.map(p=>{
-    const role = p.id===impostor.id ? 'Impostor' : 'Tripulante';
-    const tema = p.id===impostor.id ? randomPick(TEMAS_VAGOS_IMPOSTOR) : topicGroup;
+  const totalPlayers = state.players.length;
+  const impostorCount = Math.max(1, Math.floor(totalPlayers / 4));
+
+  const shuffled = shuffle(state.players);
+  const impostors = shuffled.slice(0, impostorCount);
+  const impostorIds = impostors.map(p => p.id);
+
+  const links = state.players.map(p => {
+    const isImpostor = impostorIds.includes(p.id);
+    const role = isImpostor ? 'Impostor' : 'Tripulante';
+    const tema = isImpostor ? '' : topicGroup; // impostor a ciegas
+
     const url = new URL(location.origin + location.pathname.replace('index.html','') + 'player.html');
     url.searchParams.set('room', state.roomName);
     url.searchParams.set('name', p.name);
@@ -84,9 +96,12 @@ function generateAssignments(){
     url.searchParams.set('r', String(state.round));
     return { id:p.id, name:p.name, url:url.toString(), role, tema };
   });
-  state.hostAssignments = { topicGroup, impostorId: impostor.id, links };
-  save(); $('#tema-actual').textContent = `Tema: ${topicGroup}`; renderLinks();
-  alert(`Roles asignados. Tema del grupo: ${topicGroup}`);
+
+  state.hostAssignments = { topicGroup, impostorIds, links };
+  save();
+  $('#tema-actual').textContent = `Tema: ${topicGroup}`;
+  renderLinks();
+  alert(`Roles asignados. Impostores: ${impostorIds.length}. Tema del grupo: ${topicGroup}`);
 }
 $('#btn-asignar').addEventListener('click', generateAssignments);
 $('#btn-nueva-ronda').addEventListener('click', ()=>{ state.round+=1; state.votes={}; state.hostAssignments=null; save(); renderRoom(); $('#tema-actual').textContent='Tema: —'; });
@@ -100,18 +115,27 @@ function renderLinks(){
     c.appendChild(row);
   });
 }
-$('#btn-copiar-todos').addEventListener('click', async ()=>{ if(!state.hostAssignments) return alert('Primero asigná roles.'); const all=state.hostAssignments.links.map(l=>`${l.name}: ${l.url}`).join('\n'); const ok=await copyText(all); alert(ok?'Links copiados al portapapeles':all); });
+$('#btn-copiar-todos').addEventListener('click', async ()=>{ if(!state.hostAssignments) return alert('Primero asigná roles.'); const all=state.hostAssignments.links.map(l=>`${l.name}: ${l.url}`).join('
+'); const ok=await copyText(all); alert(ok?'Links copiados al portapapeles':all); });
 
 function renderVotesTable(){ const c=$('#tabla-votos'); if(!c) return; c.innerHTML=''; const options=state.players.map(p=>({value:p.id,label:p.name})); state.players.forEach(p=>{ const sel=el('select',{id:`vote-${p.id}`}, el('option',{value:''},'—')); options.forEach(o=> sel.appendChild(el('option',{value:o.value},o.label))); if(state.votes[p.id]) sel.value=state.votes[p.id]; sel.addEventListener('change',()=>{ state.votes[p.id]=sel.value; save(); }); c.appendChild(el('div',{class:'player'}, el('div',{},p.name), sel)); }); }
 $('#btn-limpiar-votos').addEventListener('click', ()=>{ state.votes={}; save(); renderVotesTable(); $('#resultado').textContent=''; });
 $('#btn-calcular').addEventListener('click', ()=>{
   const tally={}; Object.values(state.votes).forEach(t=>{ if(!t) return; tally[t]=(tally[t]||0)+1; });
-  const maxVotes=Math.max(0,...Object.values(tally)); const candidates=Object.entries(tally).filter(([pid,v])=>v===maxVotes).map(([pid])=>pid);
+  const maxVotes=Math.max(0,...Object.values(tally));
+  const candidates=Object.entries(tally).filter(([pid,v])=>v===maxVotes).map(([pid])=>pid);
   if(!maxVotes){ $('#resultado').textContent='Sin votos suficientes.'; return; }
-  const accusedId = candidates[0]; const accused = state.players.find(p=>p.id===accusedId);
-  const isImpostor = state.hostAssignments && accusedId===state.hostAssignments.impostorId;
-  $('#resultado').innerHTML = isImpostor ? `🔎 Acusado: <b>${accused?.name}</b>. ¡Era el impostor! (+1 punto para todos menos el impostor)` : `🤷 Acusado: <b>${accused?.name}</b>. No era el impostor. (+2 puntos para el impostor)`;
-  if(isImpostor){ const impId=state.hostAssignments.impostorId; state.players.forEach(p=>{ if(p.id!==impId) state.scores[p.id]=(state.scores[p.id]||0)+1; }); } else { const impId=state.hostAssignments.impostorId; state.scores[impId]=(state.scores[impId]||0)+2; }
+  const accusedId=candidates[0];
+  const accused=state.players.find(p=>p.id===accusedId);
+  const impostorIds=(state.hostAssignments && state.hostAssignments.impostorIds)||[];
+  const isImpostor=impostorIds.includes(accusedId);
+  if(isImpostor){
+    $('#resultado').innerHTML=`🔎 Acusado: <b>${accused?.name}</b>. ¡Era impostor! (+1 punto para todos los tripulantes)`;
+    state.players.forEach(p=>{ if(!impostorIds.includes(p.id)) state.scores[p.id]=(state.scores[p.id]||0)+1; });
+  } else {
+    $('#resultado').innerHTML=`🤷 Acusado: <b>${accused?.name}</b>. No era impostor. (+2 puntos para cada impostor)`;
+    impostorIds.forEach(id=>{ state.scores[id]=(state.scores[id]||0)+2; });
+  }
   save(); renderScores();
 });
 

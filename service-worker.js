@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'impostor-ibp-v2';
+const CACHE_NAME = 'impostor-ibp-v3';
 const ASSETS = [
   './',
   'index.html',
