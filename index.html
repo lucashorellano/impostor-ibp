@@ -4,17 +4,35 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>IBP LatAm · El Impostor – Host</title>
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css" />
-  <meta name="theme-color" content="#0ea5e9" />
+  <title>El Impostor – Host (ULTRA SAFE)</title>
+  <style>
+    :root{ --bg:#0f172a; --card:#111827; --text:#e5e7eb; --muted:#94a3b8; --primary:#0ea5e9; --accent:#22c55e; --warn:#f59e0b; --danger:#ef4444 }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    header{display:flex;align-items:center;gap:.75rem;padding:1rem;border-bottom:1px solid #1f2937;position:sticky;top:0;background:rgba(15,23,42,.8);backdrop-filter:blur(6px)}
+    header h1{font-size:1.05rem;margin:0}
+    main{max-width:980px;margin:0 auto;padding:1rem}
+    .card{background:var(--card);border:1px solid #1f2937;border-radius:12px;padding:1rem;margin:1rem 0}
+    h2{margin:.25rem 0 1rem 0;font-size:1.05rem}
+    label{display:block;font-size:.9rem;color:var(--muted);margin:.25rem 0}
+    input,select,textarea{width:100%;padding:.65rem .75rem;background:#0b1220;border:1px solid #1f2937;color:var(--text);border-radius:10px;outline:none}
+    .row{display:flex;gap:.75rem;flex-wrap:wrap}.row>*{flex:1 1 280px}
+    button{background:var(--primary);color:#001018;border:none;padding:.65rem .9rem;border-radius:10px;cursor:pointer;font-weight:600}
+    button.secondary{background:#1f2937;color:var(--text)}
+    button.ghost{background:transparent;border:1px solid #1f2937;color:var(--text)}
+    .pill{display:inline-block;padding:.15rem .5rem;border-radius:999px;background:#0b1220;border:1px solid #1f2937;color:#cbd5e1;font-size:.75rem}
+    .players{display:grid;gap:.5rem}
+    .player{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.5rem;border:1px dashed #334155;border-radius:10px}
+    .muted{color:var(--muted)}.small{font-size:.85rem}.success{color:var(--accent)}.warning{color:var(--warn)}.danger{color:var(--danger)}
+    .spacer{height:.5rem}
+    pre.debug{white-space:pre-wrap;background:#0b1220;border:1px solid #1f2937;padding:.75rem;border-radius:10px;color:#cbd5e1}
+  </style>
 </head>
 <body>
   <header>
-    <img src="assets/brand_logo.png" alt="Logo" />
-    <h1><span id="brand-name">IBP LatAm</span> · El Impostor – Online · <span class="muted small">Host</span></h1>
+    <h1>El Impostor – <span class="muted small">Host · ULTRA SAFE v4.2</span></h1>
     <div style="margin-left:auto"></div>
-    <button id="btn-instalar" class="secondary small hidden">Instalar App</button>
+    <span class="pill">Build: ULTRA SAFE v4.2 (sin SW, JS inline)</span>
   </header>
   <main>
     <div class="card">
@@ -28,13 +46,6 @@
           <label>Cantidad de jugadores (máx 30)</label>
           <input id="numPlayers" type="number" min="3" max="30" value="10" />
         </div>
-        <div>
-          <label>Modo</label>
-          <select id="mode">
-            <option value="links" selected>Links privados por jugador (sin backend)</option>
-            <option value="unico">Un dispositivo (host comparte pantalla)</option>
-          </select>
-        </div>
       </div>
       <div class="spacer"></div>
       <div>
@@ -44,12 +55,11 @@
       <div class="spacer"></div>
       <div class="row">
         <button id="btn-crear">Crear Sala</button>
-        <button id="btn-restaurar" class="secondary">Restaurar última sala</button>
         <button id="btn-reset" class="ghost">Reset</button>
       </div>
     </div>
 
-    <div id="panel-sala" class="card hidden">
+    <div id="panel-sala" class="card" style="display:none">
       <h2>Sala <span id="sala"></span> · Ronda <span id="ronda">1</span></h2>
       <div class="row">
         <div>
@@ -60,34 +70,29 @@
           <button id="btn-nueva-ronda" class="secondary">Nueva ronda</button>
         </div>
       </div>
-
       <div class="spacer"></div>
-      <div class="grid cols-2">
-        <div>
+      <div class="row">
+        <div style="flex:1 1 340px">
           <h3>Jugadores</h3>
           <div id="lista-jugadores" class="players"></div>
         </div>
-        <div>
+        <div style="flex:1 1 340px">
           <h3>Links privados</h3>
-          <p class="small muted">En modo <b>Links</b>, copiá y compartí el link privado por jugador (WhatsApp/Teams). El link revela su rol y el tema.</p>
+          <p class="small muted">Copiá y compartí el link privado por jugador.</p>
           <div id="links-privados" class="players"></div>
-          <div class="row">
-            <button id="btn-copiar-todos" class="secondary">Copiar todos</button>
-          </div>
         </div>
       </div>
     </div>
 
-    <div id="panel-ronda" class="card hidden">
+    <div id="panel-ronda" class="card" style="display:none">
       <h2>Ronda en curso</h2>
       <div class="row">
-        <div><span class="pill">Respuestas: <span id="cron-resp">00:00</span></span></div>
+        <div><span class="pill">Respuestas: <span id="cron-resp">05:00</span></span></div>
         <div><button id="btn-timer-resp" class="secondary">▶ Iniciar (5:00)</button></div>
       </div>
       <div class="spacer"></div>
       <div>
         <h3>Votación</h3>
-        <p class="small muted">Cargá los votos recibidos (por chat o verbal). Opcional: mostrás en pantalla y todos votan levantando mano.</p>
         <div id="tabla-votos" class="players"></div>
         <div class="row">
           <button id="btn-calcular">Calcular acusado</button>
@@ -97,13 +102,129 @@
       </div>
     </div>
 
-    <div id="panel-puntajes" class="card hidden">
+    <div id="panel-puntajes" class="card" style="display:none">
       <h2>Puntajes</h2>
       <div id="tabla-puntajes" class="players"></div>
     </div>
 
-    <div class="footer">IBP LatAm · PWA. Instalá la app con el botón <code class="inline">Instalar App</code> (HTTPS).</div>
+    <div class="card">
+      <h2>Diagnóstico rápido</h2>
+      <pre id="debug" class="debug small"></pre>
+    </div>
   </main>
-  <script src="app.js"></script>
+
+  <script>
+  (function(){
+    const VERSION = 'ULTRA SAFE v4.2';
+    const debug = (msg) => { const el=document.getElementById('debug'); el.textContent += msg + "
+"; console.log(msg); };
+    debug(`Build ${VERSION} loaded (inline JS, sin SW).`);
+
+    const $ = (s) => document.querySelector(s);
+    const el = (tag, attrs={}, ...children) => { const n=document.createElement(tag); for(const[k,v] of Object.entries(attrs)){ if(k==='class') n.className=v; else if(k==='html') n.innerHTML=v; else n.setAttribute(k,v);} for(const c of children){ if(typeof c==='string') n.appendChild(document.createTextNode(c)); else if(c) n.appendChild(c);} return n; };
+    const copyText = async (t) => { try{ await navigator.clipboard.writeText(t); return true;}catch(e){ debug('Clipboard error: '+e); return false; } };
+    const randomPick = (arr)=> arr[Math.floor(Math.random()*arr.length)];
+    const shuffle=(a)=>{a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a;};
+
+    const TEMAS_TRIPULANTES=['Mate','Sushi','Harry Potter','Fast & Furious','Los Simpson','Johnny Depp','George Clooney','Extraterrestre','Paris','New York'];
+
+    let state={ roomName:'', players:[], round:1, hostAssignments:null, votes:{}, scores:{} };
+
+    function fmt(s){ const m=Math.floor(s/60), ss=String(s%60).padStart(2,'0'); return `${String(m).padStart(2,'0')}:${ss}`; }
+
+    $('#btn-crear').addEventListener('click', ()=>{
+      const roomName=($('#roomName').value||'').trim()||`Sala-${Math.floor(Math.random()*1000)}`;
+      const n=Math.max(3, Math.min(30, parseInt($('#numPlayers').value||'10')));
+      const namesTxt=($('#names').value||'').trim();
+      const names = namesTxt ? namesTxt.replace(//g,'').split('
+').flatMap(l=>l.split(',')).map(s=>s.trim()).filter(Boolean) : Array.from({length:n},(_,i)=>`Jugador ${i+1}`);
+      const players = names.slice(0,n).map((name,i)=>({id:`p${i+1}`, name}));
+      state={ roomName, players, round:1, hostAssignments:null, votes:{}, scores:Object.fromEntries(players.map(p=>[p.id,0])) };
+      renderRoom(); debug(`Sala creada: ${roomName} · Jugadores: ${players.length}`);
+    });
+
+    $('#btn-reset').addEventListener('click', ()=>{ if(confirm('¿Resetear?')) location.reload(); });
+
+    function renderRoom(){
+      $('#panel-sala').style.display='block';
+      $('#panel-ronda').style.display='block';
+      $('#panel-puntajes').style.display='block';
+      $('#sala').textContent=state.roomName; $('#ronda').textContent=String(state.round);
+      const c=$('#lista-jugadores'); c.innerHTML='';
+      state.players.forEach(p=> c.appendChild(el('div',{class:'player'}, el('div',{}, el('strong',{},p.name),' ', el('span',{class:'muted small'},`(${p.id})`)))) );
+      renderScores(); renderVotesTable();
+    }
+
+    function renderScores(){
+      const c=$('#tabla-puntajes'); c.innerHTML='';
+      Object.entries(state.scores).sort((a,b)=>b[1]-a[1]).forEach(([pid,pts],rank)=>{
+        const p=state.players.find(x=>x.id===pid);
+        c.appendChild(el('div',{class:'player'}, el('div',{},`${rank+1}. ${p?.name||pid}`), el('div',{class: pts>0?'success':'muted'}, `${pts} pts`)));
+      });
+    }
+
+    function generateAssignments(){
+      const topicGroup=randomPick(TEMAS_TRIPULANTES);
+      const total=state.players.length;
+      const impostorCount=Math.max(1, Math.floor(total/4));
+      const impostors=shuffle(state.players).slice(0,impostorCount);
+      const impostorIds=impostors.map(p=>p.id);
+      const links = state.players.map(p=>{
+        const isImpostor=impostorIds.includes(p.id);
+        const role=isImpostor?'Impostor':'Tripulante';
+        const tema=isImpostor?'':topicGroup;
+        const base = location.origin + location.pathname.replace('index.html','');
+        const url = new URL(base + 'player.html');
+        url.searchParams.set('room', state.roomName);
+        url.searchParams.set('name', p.name);
+        url.searchParams.set('role', role);
+        url.searchParams.set('topic', tema);
+        url.searchParams.set('r', String(state.round));
+        return { id:p.id, name:p.name, url:url.toString(), role, tema };
+      });
+      state.hostAssignments={ topicGroup, impostorIds, links };
+      $('#tema-actual').textContent = `Tema: ${topicGroup}`;
+      const c=$('#links-privados'); c.innerHTML='';
+      links.forEach((lk,i)=> c.appendChild(el('div',{class:'player'}, el('div',{}, el('strong',{},`${i+1}. ${lk.name}`),' ', el('span',{class:'pill'}, lk.role)), el('div',{}, el('button',{class:'secondary small',onclick:async()=>{ const ok=await copyText(lk.url); alert(ok?'Link copiado':lk.url); }}, 'Copiar link')) )));
+      alert(`Roles asignados. Impostores: ${impostorIds.length}. Tema del grupo: ${state.hostAssignments.topicGroup}`);
+      debug(`Asignados impostores: ${impostorIds.join(', ')}`);
+    }
+    $('#btn-asignar').addEventListener('click', generateAssignments);
+
+    $('#btn-nueva-ronda').addEventListener('click', ()=>{ state.round+=1; state.votes={}; state.hostAssignments=null; renderRoom(); $('#tema-actual').textContent='Tema: —'; debug('Nueva ronda'); });
+
+    function renderVotesTable(){ const c=$('#tabla-votos'); c.innerHTML=''; const options=state.players.map(p=>({value:p.id,label:p.name})); state.players.forEach(p=>{ const sel=el('select',{id:`vote-${p.id}`}, el('option',{value:''},'—')); options.forEach(o=> sel.appendChild(el('option',{value:o.value},o.label))); sel.addEventListener('change',()=>{ state.votes[p.id]=sel.value; }); c.appendChild(el('div',{class:'player'}, el('div',{},p.name), sel)); }); }
+
+    $('#btn-limpiar-votos').addEventListener('click', ()=>{ state.votes={}; renderVotesTable(); $('#resultado').textContent=''; debug('Votos limpiados'); });
+
+    $('#btn-calcular').addEventListener('click', ()=>{
+      const tally={}; Object.values(state.votes).forEach(t=>{ if(!t) return; tally[t]=(tally[t]||0)+1; });
+      const vals=Object.values(tally);
+      const maxVotes=vals.length? Math.max(...vals) : 0;
+      if(!maxVotes){ $('#resultado').textContent='Sin votos suficientes.'; debug('Sin votos'); return; }
+      const accusedId=Object.entries(tally).filter(([pid,v])=>v===maxVotes)[0][0];
+      const accused=state.players.find(p=>p.id===accusedId);
+      const impostorIds=(state.hostAssignments && state.hostAssignments.impostorIds)||[];
+      const isImpostor=impostorIds.includes(accusedId);
+      if(isImpostor){
+        $('#resultado').innerHTML=`🔎 Acusado: <b>${accused?.name}</b>. ¡Era impostor! (+1 punto para todos los tripulantes)`;
+        state.players.forEach(p=>{ if(!impostorIds.includes(p.id)) state.scores[p.id]=(state.scores[p.id]||0)+1; });
+        debug(`Acierto: ${accused?.name}`);
+      } else {
+        $('#resultado').innerHTML=`🤷 Acusado: <b>${accused?.name}</b>. No era impostor. (+2 puntos para cada impostor)`;
+        impostorIds.forEach(id=>{ state.scores[id]=(state.scores[id]||0)+2; });
+        debug(`Fallo: ${accused?.name}`);
+      }
+      renderScores();
+    });
+
+    // Timer simple
+    let timer=null, remaining=300; const up=()=>{ $('#cron-resp').textContent=fmt(remaining); };
+    up();
+    $('#btn-timer-resp').addEventListener('click', ()=>{ if(timer){ clearInterval(timer); timer=null; $('#btn-timer-resp').textContent='▶ Iniciar (5:00)'; remaining=300; up(); return;} $('#btn-timer-resp').textContent='⏸ Pausar'; timer=setInterval(()=>{ remaining--; up(); if(remaining<=0){ clearInterval(timer); timer=null; alert('Fin del tiempo'); $('#btn-timer-resp').textContent='▶ Iniciar (5:00)'; remaining=300; up(); } },1000); });
+
+    debug(`Origin: ${location.origin}`); debug(`Pathname: ${location.pathname}`);
+  })();
+  </script>
 </body>
 </html>
